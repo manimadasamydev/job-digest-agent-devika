@@ -1,0 +1,62 @@
+name: job-digest
+
+on:
+  schedule:
+    - cron: "30 2,12 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  digest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install
+        run: pip install -r requirements.txt
+      - name: Check required secrets
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          JOB_AGENT_TOKEN: ${{ secrets.JOB_AGENT_TOKEN }}
+          GMAIL_USER: ${{ secrets.GMAIL_USER }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+        run: |
+          python - <<'PY'
+          import os, sys
+          need = [
+              "SUPABASE_URL",
+              "SUPABASE_SERVICE_ROLE_KEY",
+              "JOB_AGENT_TOKEN",
+              "GMAIL_USER",
+              "GMAIL_APP_PASSWORD",
+          ]
+          missing = [n for n in need if not (os.getenv(n) or "").strip()]
+          if missing:
+              print("::error::Missing GitHub Actions secrets: " + ", ".join(missing))
+              print("Repo Settings -> Secrets and variables -> Actions")
+              sys.exit(1)
+          print("required secrets are present")
+          PY
+      - name: Run digest
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          JOB_AGENT_TOKEN: ${{ secrets.JOB_AGENT_TOKEN }}
+          OLLAMA_API_KEY: ${{ secrets.OLLAMA_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          OPENROUTER_API_KEY_PAM: ${{ secrets.OPENROUTER_API_KEY_PAM }}
+          OPENROUTER_API_KEY_PAM_TEST: ${{ secrets.OPENROUTER_API_KEY_PAM_TEST }}
+          MISTRAL_API_KEY: ${{ secrets.MISTRAL_API_KEY }}
+          PARALLEL_API_KEY: ${{ secrets.PARALLEL_API_KEY }}
+          TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY }}
+          GMAIL_USER: ${{ secrets.GMAIL_USER }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          MAIL_TO: ${{ secrets.MAIL_TO }}
+        run: python -m job_agent
