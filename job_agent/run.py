@@ -174,10 +174,8 @@ def _filter(listings: list[Listing]) -> list[Listing]:
         blob = f"{item.title} {item.company} {item.location} {item.description}"
         if not title_prefilter(item.title, blob):
             continue
-        if item.location and not location_ok(item.location, blob):
-            # board searches are already city-scoped
-            if not str(item.source).startswith("careers:"):
-                out.append(item)
+        # Remote-only India: require remote/WFH signal in location or description.
+        if not location_ok(item.location or "", blob):
             continue
         out.append(item)
     return out

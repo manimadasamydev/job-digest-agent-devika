@@ -81,7 +81,7 @@ def _extract(board: str, html: str, page_url: str) -> list[Listing]:
         blob = f"{title} {loc_guess}"
         if not location_ok(blob, page_url) and board not in {"linkedin", "naukri", "foundit", "instahyre", "wellfound", "cutshort", "tophire"}:
             continue
-        location = loc_guess or ("Chennai/Bengaluru search" if board in BLOCK_PRONE else "")
+        location = loc_guess or ("Remote India" if board in BLOCK_PRONE else "")
         if not title_prefilter(title, location):
             continue
         host = urlparse(href).netloc

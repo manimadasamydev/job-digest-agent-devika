@@ -2,32 +2,57 @@ from __future__ import annotations
 
 import re
 
-NAME = "Manikandan Madasamy"
-EMAIL = "manimadasamy.dev@gmail.com"
-CITIES = ("Chennai", "Bengaluru")
+NAME = "Devika Madasamy"
+EMAIL = "devika120898@gmail.com"
+# Used as board search locations (remote / India-wide).
+CITIES = ("India", "Remote")
 CITY_ALIASES = {
     "chennai": "Chennai",
     "madras": "Chennai",
     "bengaluru": "Bengaluru",
     "bangalore": "Bengaluru",
     "blr": "Bengaluru",
+    "hyderabad": "Hyderabad",
+    "pune": "Pune",
+    "mumbai": "Mumbai",
+    "delhi": "Delhi",
+    "gurgaon": "Gurgaon",
+    "gurugram": "Gurugram",
+    "noida": "Noida",
+    "india": "India",
 }
 
+REMOTE_WORDS = (
+    "remote",
+    "work from home",
+    "work-from-home",
+    "wfh",
+    "w.f.h",
+    "anywhere in india",
+    "pan india",
+    "pan-india",
+    "panindia",
+    "india remote",
+    "remote india",
+    "fully remote",
+    "100% remote",
+)
+
 RESUME_SUMMARY = """
-Manikandan Madasamy, Java Developer targeting roles in Chennai and Bengaluru.
-Target titles: Java Developer, Java Backend Developer, Java Full Stack Developer.
-Stack focus: Java, Spring, Spring Boot, REST APIs, Hibernate/JPA, SQL, backend services;
-full stack Java when needed (basic frontend OK). Open to Chennai and Bengaluru.
-Target band: mid-level Java roles. Not intern/campus. Not 8+ year staff/principal-only.
-Not pure frontend-only, mobile-only, Python/AI-only, or .NET-only.
+Devika Madasamy, Java Backend Developer with 6+ years experience.
+Target titles: Java Backend Developer, Java Developer, Spring Boot Developer, Microservices Developer.
+Stack focus: Java, Spring, Spring Boot, REST APIs, Hibernate/JPA, SQL, microservices, backend services.
+Location: Remote only, anywhere in India (WFH / pan-India remote). Not office-only / onsite-only.
+Experience band: 5-10 years mid-senior. Not intern/fresher/junior 0-3. Not principal/staff 12+ only.
+Not pure frontend-only, mobile-only, Python/AI-only, .NET-only, or full-stack-frontend roles.
 """.strip()
 
 BOARD_QUERIES = (
-    "Java Developer",
     "Java Backend Developer",
-    "Java Full Stack Developer",
+    "Java Developer",
     "Spring Boot Developer",
     "Java Microservices",
+    "Remote Java Backend",
 )
 
 TITLE_KEEP = (
@@ -39,12 +64,11 @@ TITLE_KEEP = (
     "jpa",
     "microservices",
     "backend",
-    "full stack",
-    "fullstack",
-    "full-stack",
     "rest api",
     "j2ee",
     "jakarta",
+    "kafka",
+    "api developer",
 )
 
 JAVA_SIGNAL = (
@@ -64,6 +88,8 @@ REJECT_TITLE = (
     "internship",
     "campus",
     "graduate trainee",
+    "fresher",
+    "junior developer",
     "android",
     "ios developer",
     "react native",
@@ -76,16 +102,35 @@ REJECT_TITLE = (
     "genai",
     "data scientist",
     "frontend developer",
+    "front end developer",
+    "front-end developer",
     "ui developer",
     "ux designer",
+    "react developer",
+    "angular developer",
     "qa intern",
+    "full stack developer",
+    "fullstack developer",
+    "full-stack developer",
 )
 
-SENIOR_ONLY = re.compile(
-    r"\b(10\+|12\+|15\+|8\+\s*years|principal engineer|staff engineer|distinguished engineer)\b",
+# Reject very senior leadership / 12+ only postings.
+TOO_SENIOR = re.compile(
+    r"\b(12\+|15\+|principal engineer|staff engineer|distinguished engineer|"
+    r"engineering manager|director of engineering|vp engineering)\b",
     re.I,
 )
-MID_BAND = re.compile(r"\b([2-5])\s*[-–to]{1,3}\s*([5-7])\s*years\b", re.I)
+# Reject junior / early-career only postings.
+TOO_JUNIOR = re.compile(
+    r"\b(fresher|0\s*[-–to]{1,3}\s*[123]\s*years|1\s*[-–to]{1,3}\s*[23]\s*years|"
+    r"2\s*[-–to]{1,3}\s*4\s*years|junior\s+java|entry\s*level)\b",
+    re.I,
+)
+# Prefer mid-senior bands around 5-10 / 6+.
+EXPERIENCE_OK = re.compile(
+    r"\b([5-9]|10)\s*[-–to+]{0,3}\s*([6-9]|1[0-2])?\s*years?\b|\b6\+\s*years?\b|\b5\+\s*years?\b",
+    re.I,
+)
 
 
 def _blob(*parts: str) -> str:
@@ -93,27 +138,68 @@ def _blob(*parts: str) -> str:
 
 
 def location_ok(location: str, extra: str = "") -> bool:
+    """Remote-only, India-wide."""
     text = _blob(location, extra)
-    if any(alias in text for alias in CITY_ALIASES):
-        return True
-    if "india" in text and any(w in text for w in ("remote", "work from home", "wfh", "hybrid")):
-        return True
-    return False
+    if not text.strip():
+        return False
+    remote = any(w in text for w in REMOTE_WORDS)
+    if not remote:
+        return False
+    # Prefer India / Indian cities / pan-India; allow generic "remote" if not clearly foreign-only.
+    indiaish = (
+        "india" in text
+        or "pan india" in text
+        or "pan-india" in text
+        or any(alias in text for alias in CITY_ALIASES)
+    )
+    foreign_only = any(
+        w in text
+        for w in (
+            "united states",
+            " usa",
+            "u.s.",
+            "uk only",
+            "united kingdom",
+            "europe only",
+            "canada only",
+            "australia only",
+        )
+    )
+    if foreign_only and "india" not in text:
+        return False
+    return indiaish or remote
 
 
 def title_prefilter(title: str, description: str = "") -> bool:
     blob = _blob(title, description[:1200])
     if any(bad in blob for bad in REJECT_TITLE) and not any(s in blob for s in JAVA_SIGNAL):
         return False
-    if "intern" in blob or "internship" in blob or "campus hire" in blob:
+    # Hard-reject frontend / full-stack title noise even if "java" appears in description.
+    title_l = (title or "").lower()
+    if any(
+        bad in title_l
+        for bad in (
+            "frontend",
+            "front-end",
+            "front end",
+            "full stack",
+            "fullstack",
+            "full-stack",
+            "react developer",
+            "angular developer",
+            "ui developer",
+        )
+    ):
         return False
-    if SENIOR_ONLY.search(blob) and not MID_BAND.search(blob):
+    if "intern" in blob or "internship" in blob or "campus hire" in blob or "fresher" in blob:
+        return False
+    if TOO_SENIOR.search(blob):
+        return False
+    if TOO_JUNIOR.search(blob) and not EXPERIENCE_OK.search(blob):
         return False
     if not any(k in blob for k in TITLE_KEEP):
         return False
-    title_l = (title or "").lower()
-    # Keep backend/full-stack titles only when Java stack is present
-    if any(k in title_l for k in ("backend", "full stack", "fullstack", "full-stack")) and not any(
+    if any(k in title_l for k in ("backend", "api developer")) and not any(
         s in blob for s in JAVA_SIGNAL
     ):
         return False
@@ -122,6 +208,8 @@ def title_prefilter(title: str, description: str = "") -> bool:
 
 def city_label(location: str) -> str:
     text = (location or "").lower()
+    if any(w in text for w in REMOTE_WORDS):
+        return "Remote India"
     for alias, label in CITY_ALIASES.items():
         if alias in text:
             return label

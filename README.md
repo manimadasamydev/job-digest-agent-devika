@@ -1,16 +1,15 @@
-# Job Digest Agent
+# Job Digest Agent — Devika Madasamy
 
-Twice-daily digest of **Java Developer / Java Backend / Java Full Stack** roles in **Chennai** and **Bengaluru**, ranked against Manikandan Madasamy's profile.
+Twice-daily digest of **Java Backend Developer** roles (**Remote only, India-wide**), ranked for Devika Madasamy (~6+ years).
 
-Runs on a schedule at **8:00 AM and 6:00 PM IST** (`30 2,12 * * *` UTC), stores listings in Supabase, and emails **only new** matches to `manimadasamy.dev@gmail.com`.
+Emails **only new** matches to `devika120898@gmail.com`.
 
-## What it searches
+## Profile rules
 
-- Boards: TopHire, Cutshort, LinkedIn, Naukri, Foundit, Instahyre, Wellfound
-- Official company career pages
-- Parallel, then Tavily, only when LinkedIn / Naukri / Foundit are blocked (budgeted)
-
-Duplicates are keyed by URL fingerprint. A job is emailed at most once.
+- Role: Java Backend / Spring Boot / Microservices
+- Location: Remote / WFH / pan-India remote only (not office-only)
+- Experience: mid-senior (~5–10 / 6+ years); reject fresher/junior and principal/staff-only
+- Reject: frontend, full-stack UI, intern, Python/AI-only, .NET-only
 
 ## Local run
 
@@ -23,15 +22,6 @@ copy .env.example .env
 python -m job_agent
 ```
 
-## Free hosting (recommended)
+## Free hosting
 
-Use **GitHub Actions** (`.github/workflows/digest.yml`) with the same secrets as `.env`. Free Render web cannot send Gmail SMTP reliably.
-
-## LLM order
-
-1. Ollama Cloud `gemma4:31b-cloud`
-2. Your OpenRouter key, free models only
-3. `z-ai/glm-5.3-flash` on fallback OpenRouter keys
-4. Mistral Magistral Medium
-
-If every model fails, the digest still sends a raw new-job list.
+Use GitHub Actions (`.github/workflows/digest.yml`) with the same secrets as `.env`.

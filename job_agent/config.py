@@ -48,8 +48,8 @@ def load_settings() -> Settings:
         mistral_api_key=_env("MISTRAL_API_KEY"),
         parallel_api_key=_env("PARALLEL_API_KEY"),
         tavily_api_key=_env("TAVILY_API_KEY"),
-        gmail_user=_env("GMAIL_USER", "manimadasamy.dev@gmail.com"),
+        gmail_user=_env("GMAIL_USER", "devika120898@gmail.com"),
         gmail_app_password=_env("GMAIL_APP_PASSWORD"),
-        mail_to=_env("MAIL_TO", "manimadasamy.dev@gmail.com"),
+        mail_to=_env("MAIL_TO", "devika120898@gmail.com"),
         job_agent_token=_env("JOB_AGENT_TOKEN"),
     )

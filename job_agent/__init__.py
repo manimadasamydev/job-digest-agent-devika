@@ -1,3 +1,1 @@
-"""Chennai / Bangalore job digest agent."""
-
-__version__ = "1.0.0"
+"""Remote India Java Backend job digest agent (Devika Madasamy)."""

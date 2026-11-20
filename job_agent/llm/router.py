@@ -22,12 +22,12 @@ FREE_MODELS = (
 )
 
 SYSTEM = (
-    "You rank job listings for Manikandan Madasamy. Return JSON only: "
+    "You rank job listings for Devika Madasamy. Return JSON only: "
     '{"jobs":[{"i":0,"score":0,"keep":false,"why":"..."}]} '
     "score 0-100. keep true only if score >= 55. "
-    "Prefer Java Developer / Java Backend / Java Full Stack / Spring Boot "
-    "in Chennai or Bengaluru, mid-level. "
-    "Reject intern, campus, frontend-only, Python/AI-only, .NET-only, 8+ staff-only."
+    "Prefer Java Backend / Spring Boot / Microservices, Remote India only, 6+ years. "
+    "Reject onsite-only, intern/fresher/junior, frontend/full-stack UI, "
+    "Python/AI-only, .NET-only, principal/staff 12+ only."
 )
 
 
@@ -130,8 +130,8 @@ async def _call(http: httpx.AsyncClient, kind: str, model: str, key: str, prompt
             headers={
                 "Authorization": f"Bearer {key}",
                 "Content-Type": "application/json",
-                "HTTP-Referer": "https://github.com/manimadasamy/job-digest-agent",
-                "X-Title": "job-digest-agent",
+                "HTTP-Referer": "https://github.com/devika120898/job-digest-agent",
+                "X-Title": "job-digest-agent-devika",
             },
         )
         return _openai_content(data)

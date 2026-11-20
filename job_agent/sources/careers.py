@@ -62,10 +62,10 @@ async def _special_apis(http: httpx.AsyncClient, name: str) -> list[Listing]:
 
 async def _amazon(http: httpx.AsyncClient) -> list[Listing]:
     out: list[Listing] = []
-    for city in ("Bengaluru", "Chennai"):
+    for city in ("India", "Bangalore"):
         url = (
             "https://www.amazon.jobs/en/search.json"
-            f"?base_query=Java+Developer+OR+Spring+Boot&loc_query={city}&normalized_country_code=IND&result_limit=40"
+            f"?base_query=Java+Backend+OR+Spring+Boot+Remote&loc_query={city}&normalized_country_code=IND&result_limit=40"
         )
         data = await get_json(http, url)
         jobs = (data or {}).get("jobs") if isinstance(data, dict) else None
@@ -90,10 +90,10 @@ async def _amazon(http: httpx.AsyncClient) -> list[Listing]:
 
 async def _google(http: httpx.AsyncClient) -> list[Listing]:
     out: list[Listing] = []
-    for loc in ("Bangalore, India", "Chennai, India"):
+    for loc in ("India", "Bangalore, India"):
         url = (
             "https://careers.google.com/api/v3/search/"
-            f"?q=Java%20Developer%20OR%20Spring%20Boot&location={loc.replace(' ', '%20')}"
+            f"?q=Java%20Backend%20OR%20Spring%20Boot%20Remote&location={loc.replace(' ', '%20')}"
         )
         data = await get_json(http, url)
         jobs = (data or {}).get("jobs") if isinstance(data, dict) else None
@@ -120,7 +120,7 @@ async def _google(http: httpx.AsyncClient) -> list[Listing]:
 async def _microsoft(http: httpx.AsyncClient) -> list[Listing]:
     url = (
         "https://gcsservices.careers.microsoft.com/search/api/v1/search"
-        "?q=Java%20Developer%20Spring%20Boot&lc=en_us&pg=1&pgSz=40&o=Relevance&flt=true&l=India"
+        "?q=Java%20Backend%20Spring%20Boot%20Remote&lc=en_us&pg=1&pgSz=40&o=Relevance&flt=true&l=India"
     )
     data = await get_json(http, url)
     jobs = ((data or {}).get("operationResult") or {}).get("result") if isinstance(data, dict) else None
@@ -281,7 +281,7 @@ async def _workday(http: httpx.AsyncClient, name: str, board_url: str) -> list[L
     try:
         resp = await http.post(
             post_url,
-            json={"appliedFacets": {}, "limit": 40, "offset": 0, "searchText": "Java Developer Spring Boot"},
+            json={"appliedFacets": {}, "limit": 40, "offset": 0, "searchText": "Java Backend Spring Boot Remote"},
         )
         if resp.status_code >= 400:
             return []

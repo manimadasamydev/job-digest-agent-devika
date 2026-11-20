@@ -47,8 +47,8 @@ async def collect_search_listings(
         if budget.remaining() < 1:
             break
         query = (
-            f"Java Developer OR Java Backend OR Java Full Stack OR Spring Boot "
-            f"Chennai OR Bengaluru OR Bangalore {SITE[board]} jobs posted"
+            f"Java Backend OR Spring Boot OR Java Microservices Remote "
+            f"India OR WFH {SITE[board]} jobs posted"
         )
         got = await _search(http, settings, budget, query, source=board)
         listings.extend(got)
@@ -56,7 +56,7 @@ async def collect_search_listings(
 
     if budget.remaining() > 0:
         today = (
-            "Java Developer OR Spring Boot jobs posted today Chennai OR Bengaluru OR Bangalore "
+            "Java Backend OR Spring Boot Remote India OR WFH jobs posted today "
             "site:linkedin.com/jobs OR site:naukri.com OR site:foundit.in"
         )
         listings.extend(await _search(http, settings, budget, today, source="posted-today"))
@@ -87,8 +87,8 @@ async def _parallel(http: httpx.AsyncClient, key: str, query: str) -> list[dict[
         "https://api.parallel.ai/v1/search",
         {
             "objective": (
-                "Find currently open Java Developer, Java Backend, Java Full Stack, or Spring Boot jobs "
-                "in Chennai or Bengaluru/Bangalore. Return job posting URLs with title and company."
+                "Find currently open Remote India Java Backend, Spring Boot, or Java Microservices jobs "
+                "(WFH / pan-India remote only). Return job posting URLs with title and company."
             ),
             "search_queries": [query],
             "mode": "fast",
@@ -185,8 +185,8 @@ def _company_from(title: str, snippet: str) -> str:
 
 def _location_from(blob: str) -> str:
     text = blob.lower()
-    if "chennai" in text:
-        return "Chennai"
-    if "bengaluru" in text or "bangalore" in text:
-        return "Bengaluru"
-    return "Chennai/Bengaluru"
+    if any(w in text for w in ("remote", "wfh", "work from home", "pan india")):
+        return "Remote India"
+    if "india" in text:
+        return "India"
+    return "Remote India"
